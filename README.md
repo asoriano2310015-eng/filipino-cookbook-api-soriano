@@ -269,7 +269,7 @@ GET /api/foods/search/adobo
 - **Name:** SORIANO, Andrea Mae I.
 - **Course and Section:** BS Information Technology 4B
 - **GitHub Username:** asoriano2310015-eng
-- **Repository Link:** [Repository URL]
+- **Repository Link:** https://github.com/asoriano2310015-eng/filipino-cookbook-api-soriano.git
 - **Date Completed:** July 2026
 
 ---
