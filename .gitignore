@@ -1,2 +1,21 @@
+# Vendor dependencies
+/vendor/
+
+# Environment files
 .env
-/vendor
+.env.*
+!.env.example
+
+# IDE and Editor files (prevents personal workspace settings from uploading)
+.vscode/
+.idea/
+*.sublime-*
+
+# Operating System junk files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+error_log
+*.tmp
