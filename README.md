@@ -62,7 +62,7 @@ php -S localhost:8000 -t public
 - **SQL file:** `database/filipino_cookbook_relational.sql`
 
 **Import instructions:**
-1. Open phpMyAdmin or your MySQLyog.
+1. Open phpMyAdmin (usually for XAMPP) or your MySQLyog.
 2. Create a new database named `filipino_cookbook_api`.
 3. Import `database/filipino_cookbook_relational.sql` into that database.
 
