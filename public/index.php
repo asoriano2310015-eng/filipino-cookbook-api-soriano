@@ -22,6 +22,20 @@ $app = AppFactory::create();
 $basePath = str_replace('/index.php', '',$_SERVER['SCRIPT_NAME']);
 $app->setBasePath($basePath);
 
+//Add Global CORS Middleware 
+$app->add(function (Request $request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
+// Handle preflight CORS OPTIONS requests
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+    return $response;
+});
+
 
 /**
  * DATABASE CONNECTION (PDO)
@@ -325,7 +339,8 @@ $app->post('/api/foods', function (Request $request, Response $response) {
         }
 
         // Deep Input Validation: Confirm numerical IDs are present, positive integers, and not zero
-        $integerFields = ['food_id', 'category_id', 'origin_id'];
+        // REMOVED: 'food_id' is no longer expected from the payload validation phase!
+        $integerFields = ['category_id', 'origin_id'];
         foreach ($integerFields as $field) {
             if (!isset($input[$field]) || filter_var($input[$field], FILTER_VALIDATE_INT) === false || intval($input[$field]) <= 0) {
                 $payload = json_encode(["status" => "error", "message" => "The field '" . $field . "' must be a valid positive integer."], JSON_PRETTY_PRINT);
@@ -342,11 +357,28 @@ $app->post('/api/foods', function (Request $request, Response $response) {
         }
 
         // Sanitization & Strict Type-Casting (Protects application from malicious injection inputs)
-        $food_id = intval($input['food_id']);
         $category_id = intval($input['category_id']);
         $origin_id = intval($input['origin_id']);
         $food_name = htmlspecialchars(strip_tags(trim($input['food_name'])), ENT_QUOTES, 'UTF-8');
         $instructions = htmlspecialchars(strip_tags(trim($input['instructions'])), ENT_QUOTES, 'UTF-8');
+
+        // 1. STRICT EXCLUSIVE DUPLICATE NAME CHECK 
+        // Looks up the lowercase value immediately to block duplicate names
+        $checkStmt = $db->prepare("SELECT food_name FROM foods WHERE LOWER(food_name) = LOWER(?)");
+        $checkStmt->execute([$food_name]);
+        $existingFood = $checkStmt->fetch();
+
+        if ($existingFood) {
+            $payload = json_encode(["status" => "error", "message" => "Food item name already exists."], JSON_PRETTY_PRINT);
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        // 2. AUTOMATIC MAX ID GENERATION 
+        // Programmatically finds the highest current key value, defaults to 0, then increments it by 1.
+        $idQuery = $db->query("SELECT MAX(food_id) AS max_id FROM foods");
+        $row = $idQuery->fetch();
+        $food_id = ($row && $row['max_id'] !== null) ? intval($row['max_id']) + 1 : 1;
 
         // Loop validation structure sanitizing item values passed inside the linked ingredients array
         $clean_ingredient_ids = [];
@@ -358,37 +390,18 @@ $app->post('/api/foods', function (Request $request, Response $response) {
             }
         }
 
-        // Integrity Check: Check database to prevent entry duplication across unique ID configurations or primary names
-        $checkStmt = $db->prepare("SELECT food_id, food_name FROM foods WHERE food_id = ? OR food_name = ?");
-        $checkStmt->execute([$food_id, $food_name]);
-        $existingFood = $checkStmt->fetch();
-
-        if ($existingFood) {
-            // Provide descriptive context describing exact record constraint failure
-            if ($existingFood['food_id'] == $food_id) {
-                $msg = "Food ID number is already assigned to another dish.";
-            } else {
-                $msg = "Food item name already exists.";
-            }
-            
-            $payload = json_encode(["status" => "error", "message" => $msg], JSON_PRETTY_PRINT);
-            $response->getBody()->write($payload);
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
         // Write Phase 1: Insert core entry profile properties into primary recipes table
         $sql = "INSERT INTO foods (food_id, food_name, category_id, origin_id, instructions) VALUES (?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
         $stmt->execute([
-            $food_id,
+            $food_id,          // Mapped to our locally generated auto-incrementing key
             $food_name,
             $category_id,
             $origin_id,
             $instructions
         ]);
 
-        // Write Phase 2: Insert individual structural pivot mapping relations into bridge table 
-        // FIXED BUG: Swapped non-existent `$newFoodId` variable parameter out for operational correct `$food_id`
+        // Write Phase 2: Insert individual structural pivot mapping relations into bridge table
         if (!empty($clean_ingredient_ids)) {
             $stmt_ing = $db->prepare("INSERT INTO food_ingredients (food_id, ingredient_id) VALUES (?, ?)");
             foreach ($clean_ingredient_ids as $ingredient_id) {
@@ -400,10 +413,10 @@ $app->post('/api/foods', function (Request $request, Response $response) {
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
     } catch (PDOException $e) {
-        error_log($e->getMessage()); 
+        error_log($e->getMessage());
         
         $payload = json_encode([
-            "status" => "error", 
+            "status" => "error",
             "message" => "An internal database error occurred. Please try again later."
         ], JSON_PRETTY_PRINT);
         
@@ -421,64 +434,57 @@ $app->post('/api/ingredients', function (Request $request, Response $response) {
     try {
         $db = getDB();
         $input = json_decode($request->getBody()->getContents(), true);
-        
+
+        // Input Check: Ensure JSON format wasn't broken or empty
         if (!$input) {
             $payload = json_encode(["status" => "error", "message" => "Invalid or empty JSON payload provided."], JSON_PRETTY_PRINT);
             $response->getBody()->write($payload);
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
-        // Verify key structural elements exist and check integer type sizes
-        if (!isset($input['ingredient_id']) || filter_var($input['ingredient_id'], FILTER_VALIDATE_INT) === false || intval($input['ingredient_id']) <= 0) {
-            $payload = json_encode(["status" => "error", "message" => "Ingredient ID must be a valid positive integer."], JSON_PRETTY_PRINT);
-            $response->getBody()->write($payload);
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
+        // String Content Validation: Check if the ingredient name is missing or blank
         if (empty($input['ingredient_name']) || trim($input['ingredient_name']) === '') {
-            $payload = json_encode(["status" => "error", "message" => "Ingredient name is required and cannot be empty."], JSON_PRETTY_PRINT);
+            $payload = json_encode(["status" => "error", "message" => "Ingredient name field is required and cannot be blank."], JSON_PRETTY_PRINT);
             $response->getBody()->write($payload);
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
-        // Run data sanitization patterns cleanly
-        $ingredient_id = intval($input['ingredient_id']);
+        // Sanitization
         $ingredient_name = htmlspecialchars(strip_tags(trim($input['ingredient_name'])), ENT_QUOTES, 'UTF-8');
 
-        // Check for conflicts inside records before running insertions
-        $checkStmt = $db->prepare("SELECT ingredient_id, ingredient_name FROM ingredients WHERE ingredient_id = ? OR ingredient_name = ?");
-        $checkStmt->execute([$ingredient_id, $ingredient_name]);
-        $existingIng = $checkStmt->fetch();
+        // 1. CASE-INSENSITIVE DUPLICATE NAME CHECK 
+        $checkStmt = $db->prepare("SELECT ingredient_name FROM ingredients WHERE LOWER(ingredient_name) = LOWER(?)");
+        $checkStmt->execute([$ingredient_name]);
+        $existingIngredient = $checkStmt->fetch();
 
-        if ($existingIng) {
-            if ($existingIng['ingredient_id'] == $ingredient_id) {
-                $msg = "Ingredient ID number is already assigned to another ingredient.";
-            } else {
-                $msg = "Ingredient name already exists.";
-            }
-            
-            $payload = json_encode(["status" => "error", "message" => $msg], JSON_PRETTY_PRINT);
+        if ($existingIngredient) {
+            $payload = json_encode(["status" => "error", "message" => "Ingredient name already exists."], JSON_PRETTY_PRINT);
             $response->getBody()->write($payload);
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
-        // Commit insertion to components master matrix safely
+        // 2. AUTOMATIC MAX ID GENERATION 
+        $idQuery = $db->query("SELECT MAX(ingredient_id) AS max_id FROM ingredients");
+        $row = $idQuery->fetch();
+        $ingredient_id = ($row && $row['max_id'] !== null) ? intval($row['max_id']) + 1 : 1;
+
+        // 3. EXECUTE WRITE OPERATOR
         $sql = "INSERT INTO ingredients (ingredient_id, ingredient_name) VALUES (?, ?)";
         $stmt = $db->prepare($sql);
-        $stmt->execute([$ingredient_id, $ingredient_name]);
+        $stmt->execute([
+            $ingredient_id, // Our locally generated auto-incrementing key
+            $ingredient_name
+        ]);
 
-        $payload = json_encode([
-            "status" => "success",
-            "message" => "Ingredient added successfully."
-        ], JSON_PRETTY_PRINT);
-        
+        $payload = json_encode(["status" => "success", "message" => "Ingredient added successfully."], JSON_PRETTY_PRINT);
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+
     } catch (PDOException $e) {
-        error_log($e->getMessage()); 
+        error_log($e->getMessage());
         
         $payload = json_encode([
-            "status" => "error", 
+            "status" => "error",
             "message" => "An internal database error occurred. Please try again later."
         ], JSON_PRETTY_PRINT);
         

@@ -224,7 +224,6 @@ GET /api/foods/search/adobo
 **Example request body:**
 ```json
 {
-    "food_id": 17,
     "food_name": "Lechon Paksiw",
     "category_id": 4,
     "origin_id": 4,
@@ -250,7 +249,6 @@ GET /api/foods/search/adobo
 **Example request body:**
 ```json
 {
-    "ingredient_id": 66,
     "ingredient_name": "Magic Sarap"
 }
 ```
@@ -276,28 +274,21 @@ GET /api/foods/search/adobo
 ## Testing Evidence
 
 **Public Welcome Route**
-![Public welcome route response](screenshots/image-1.png)
+![Public welcome route response](screenshots/welcome.png)
 **`GET /api/foods` with a valid token**
-![GET /api/foods with a valid token](screenshots/image-2.png)
+![GET /api/foods with a valid token](screenshots/getAllFoods.png)
 **`GET /api/foods` with a missing/invalid token**
-![GET /api/foods with a missing or invalid token](screenshots/image-3.png)
+![GET /api/foods with a missing or invalid token](screenshots/tokenReq.png)
 **`GET /api/foods/{id}` with a non-existent ID**
-![GET /api/foods/{id} with a non-existent ID](screenshots/image-4.png)
+![GET /api/foods/{id} with a non-existent ID](screenshots/nonExID.png)
 **`GET /api/foods/search/{food_name}` with no matching name**
-![GET /api/foods/search/{food_name} with no matching name](screenshots/image-6.png)
+![GET /api/foods/search/{food_name} with no matching name](screenshots/noMatch.png)
 **`GET /api/categories`**
-![GET /api/categories response](screenshots/image-7.png)
+![GET /api/categories response](screenshots/categories.png)
 **`GET /api/ingredients`**
-![GET /api/ingredients response](screenshots/image-8.png)
+![GET /api/ingredients response](screenshots/ingredients.png)
 **`POST /api/foods`**
-![POST /api/foods response](screenshots/image-9.png)
-
-## Developer Information
-- **Name:** SORIANO, Andrea Mae I.
-- **Course and Section:** BS Information Technology 4B
-- **GitHub Username:** asoriano2310015-eng
-- **Repository Link:** https://github.com/asoriano2310015-eng/filipino-cookbook-api-soriano.git
-- **Date Completed:** July 2026
+![POST /api/foods response](screenshots/addFood.png)
 
 ---
 
@@ -340,6 +331,9 @@ This repository features advanced API features and security measures implemented
 ### Files Modified
 - `public/index.php` (Core Slim routing framework, data middleware validation layers, and database interactions)
 - `public/.htaccess` (Added to handle Apache URL rewriting for XAMPP subfolder environments)
+- `./.env.example` (Added to hide original DB configurations)
+- `./.gitignore` (Added to avoid pushing files not meant to be pushed)
+- `./README.md` (Added to guide developers)
 
 ---
 
@@ -347,24 +341,30 @@ This repository features advanced API features and security measures implemented
 
 #### Testing Security & Token Middleware
 1. Send a request to `GET /api/foods/categories/1` or `POST /api/ingredients` without providing an `Authorization` header. Confirm that the API returns an HTTP `401 Unauthorized` status with an explicit error message.
-![Protected route without Authorization header returning 401](screenshots/image-11.png)
+![Protected route without Authorization header returning 401](screenshots/catTokenReq.png)
 
 #### Testing GET `/api/foods/categories/{category_id}`
 1. Set the request header to include `Authorization: Bearer dmmmsu-cookbook-token-2026`.
 2. Issue a `GET` request to `http://localhost:8000/api/foods/categories/1`.
 3. Verify that the server returns a status `200 OK` and a JSON array containing only recipes mapped strictly to that target category ID.
 4. Repeat the test with a non-existent category (e.g., `/api/foods/categories/999`). Confirm that the API handles it gracefully, returning a `404 Not Found` response.
-![GET /api/foods/categories/{category_id} test results](screenshots/image-12.png)
+![GET /api/foods/categories/{category_id} test results](screenshots/catNonExID.png)
 
 #### Testing POST `/api/ingredients`
 1. Set the request headers to include `Authorization: Bearer dmmmsu-cookbook-token-2026` and `Content-Type: application/json`.
 2. Issue a `POST` request to `http://localhost:8000/api/ingredients` with a brand-new payload:
    ```json
    {
-       "ingredient_id": 73,
-       "ingredient_name": "Sago"
+       "ingredient_name": "Soy"
    }
    ```
 3. Confirm that the server returns a `201 Created` status with a success message.
 
-![POST /api/ingredients test result](screenshots/image-13.png)
+![POST /api/ingredients test result](screenshots/addIngr.png)
+
+## Developer Information
+- **Name:** SORIANO, Andrea Mae I.
+- **Course and Section:** BS Information Technology 4B
+- **GitHub Username:** asoriano2310015-eng
+- **Repository Link:** https://github.com/asoriano2310015-eng/filipino-cookbook-api-soriano.git
+- **Date Completed:** July 2026
