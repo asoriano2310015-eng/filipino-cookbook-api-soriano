@@ -18,6 +18,11 @@ $dotenv->safeLoad(); // safeLoad won't crash your app if the file is missing
 // Create the core Slim Application instance
 $app = AppFactory::create();
 
+// Use to automatically detect the base path for XAMPP subfolders, or default to empty for php -S
+$basePath = str_replace('/index.php', '',$_SERVER['SCRIPT_NAME']);
+$app->setBasePath($basePath);
+
+
 /**
  * DATABASE CONNECTION (PDO)
  * Establishes a connection to the MySQL database using environment variables.
@@ -27,7 +32,7 @@ function getDB() {
     $dbhost = $_ENV['DB_HOST'] ?? 'localhost';
     $dbuser = $_ENV['DB_USER'] ?? 'root';
     $dbpass = $_ENV['DB_PASS'] ?? ''; 
-    $dbname = $_ENV['DB_NAME'] ?? 'filipino_cookbook_api';
+    $dbname = $_ENV['DB_NAME'] ?? '';
 
     // Set configuration string for MySQL PDO connection using UTF-8 encoding
     $mysql_conn_string = "mysql:host=$dbhost;dbname=$dbname;charset=utf8";

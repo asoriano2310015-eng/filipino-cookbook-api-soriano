@@ -96,14 +96,23 @@ DB_USER=YOUR_DATABASE_USERNAME
 DB_PASS=YOUR_DATABASE_PASSWORD
 DB_NAME=filipino_cookbook_api
 API_BEARER_TOKEN=dmmmsu-cookbook-token-2026
+BASE_PATH=/filipino-cookbook-api-soriano/public
+> for XAMPP users
+BASE_PATH=
+> for php -S users
 ```
 > `.env` is excluded via `.gitignore`. Use `.env.example` as a template with placeholder values only.
 
 ## Base URL
+The Base URL depends entirely on the server environment you choose to deploy with:
+* **Using PHP's Built-in Server (`php -S`):**
 ```
 http://localhost:8000/api
 ```
-*(Adjust the port/path depending on how you run the server — e.g. `http://localhost/filipino-cookbook-api/public/api` if using XAMPP's htdocs.)*
+* **Using XAMPP (Local Subfolder path):**
+```
+http://localhost/filipino-cookbook-api-soriano/public/api
+```
 
 ## Authentication Instructions
 All `/api/*` endpoints (except the root `/`) require a Bearer token in the request header.
@@ -330,6 +339,7 @@ This repository features advanced API features and security measures implemented
 
 ### Files Modified
 - `public/index.php` (Core Slim routing framework, data middleware validation layers, and database interactions)
+- `public/.htaccess` (Added to handle Apache URL rewriting for XAMPP subfolder environments)
 
 ---
 
