@@ -67,19 +67,19 @@ php -S localhost:8000 -t public
 ```
 
 ## Database Setup
-- **Database name:** `filipino_cookbook_api`
+- **Database name:** `filipino_cookbook_api` or `filipino_cookbook_api_your-surname`
 - **SQL file:** `database/filipino_cookbook_relational.sql`
 
 **Import instructions:**
 Option A: Using phpMyAdmin (XAMPP Users)
 1. Open XAMPP Control Panel and start Apache and MySQL.
 2. Go to http://localhost/phpmyadmin in your browser.
-3. Click New on the left menu, name the database filipino_cookbook_api, and click Create.
+3. Click New on the left menu, name the database filipino_cookbook_api or filipino_cookbook_api_your-surname, and click Create.
 4. Click on your new database, navigate to the Import tab at the top.
 5. Choose the filipino_foods_relational.sql file from this project directory and click Import/Go.
 
 Option B: Using SQLyog / Command Line
-1. Create a database named filipino_cookbook_api in your MySQL client.
+1. Create a database named filipino_cookbook_api or filipino_cookbook_api_your-surname in your MySQL client.
 2. Execute/Import the filipino_foods_relational.sql file script into the database.
 
 **Tables and relationships:**
