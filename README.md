@@ -71,6 +71,7 @@ php -S localhost:8000 -t public
 - **SQL file:** `database/filipino_cookbook_relational.sql`
 
 **Import instructions:**
+
 Option A: Using phpMyAdmin (XAMPP Users)
 1. Open XAMPP Control Panel and start Apache and MySQL.
 2. Go to http://localhost/phpmyadmin in your browser.
