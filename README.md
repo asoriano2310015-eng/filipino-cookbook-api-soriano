@@ -43,6 +43,7 @@ The Filipino Cookbook API is a RESTful web service that provides structured info
 ```bash
 git clone [https://github.com/your-username/filipino-cookbook-api-soriano.git]
 cd filipino-cookbook-api-soriano
+# To see files, access LocalDisk C:, look at users and your OS name, search for the repo folder
 
 # 2. Install dependencies
 composer install
