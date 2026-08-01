@@ -37,9 +37,12 @@ The Filipino Cookbook API is a RESTful web service that provides structured info
 ## Installation Instructions
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/filipino-cookbook-api-soriano.git
+- **For XAMPP users:** Open your terminal inside `C:\xampp\htdocs\` and clone the repository there.
+- **For Standalone/SQLyog users:** Clone it to your preferred workspace directory.
+
+```bash
+git clone [https://github.com/your-username/filipino-cookbook-api-soriano.git]
 cd filipino-cookbook-api-soriano
-# To see the files, look into young Local Disk (C:), check users and your windows name. Look for the folder named filipino-cookbook-api-soriano.
 
 # 2. Install dependencies
 composer install
@@ -49,12 +52,17 @@ cp .env.example .env
 
 # 4. Import the SQL database (see Database Setup below)
 
-# 5. Start Apache and MySQL (e.g. via XAMPP Control Panel)
-
-# 6. Run the API using PHP's built-in server (or place the project in your htdocs/www folder)
+# 5. Run the API
+- **Method A: PHP Built-in Server (Recommended for Standalone users)**
+# Keep the terminal open and running
 php -S localhost:8000 -t public
+# Your API base URL will be: http://localhost:8000
 
-# 7. Test the endpoints using Thunder Client 
+- **Method B: XAMPP / Apache Server**
+# If you cloned the project inside C:\xampp\htdocs\, make sure Apache and MySQL are running in the XAMPP Control Panel.
+# Your API base URL will be: http://localhost/filipino-cookbook-api-soriano/public/
+
+# 6. Test the endpoints using Thunder Client 
 ```
 
 ## Database Setup
@@ -62,9 +70,16 @@ php -S localhost:8000 -t public
 - **SQL file:** `database/filipino_cookbook_relational.sql`
 
 **Import instructions:**
-1. Open phpMyAdmin (usually for XAMPP) or your MySQLyog.
-2. Create a new database named `filipino_cookbook_api`.
-3. Import `database/filipino_cookbook_relational.sql` into that database.
+Option A: Using phpMyAdmin (XAMPP Users)
+1. Open XAMPP Control Panel and start Apache and MySQL.
+2. Go to http://localhost/phpmyadmin in your browser.
+3. Click New on the left menu, name the database filipino_cookbook_api, and click Create.
+4. Click on your new database, navigate to the Import tab at the top.
+5. Choose the filipino_foods_relational.sql file from this project directory and click Import/Go.
+
+Option B: Using SQLyog / Command Line
+1. Create a database named filipino_cookbook_api in your MySQL client.
+2. Execute/Import the filipino_foods_relational.sql file script into the database.
 
 **Tables and relationships:**
 ```
