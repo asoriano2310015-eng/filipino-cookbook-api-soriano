@@ -35,28 +35,33 @@ The Filipino Cookbook API is a RESTful web service that provides structured info
 - GitHub
 
 ## Installation Instructions
-```bash
+
 # 1. Clone the repository
 - **For XAMPP users:** Open your terminal inside `C:\xampp\htdocs\` and clone the repository there.
 - **For Standalone/SQLyog users:** Clone it to your preferred workspace directory.
 
 ```bash
-git clone [https://github.com/asoriano2310015-eng/filipino-cookbook-api-soriano.git]
+git clone https://github.com/asoriano2310015-eng/filipino-cookbook-api-soriano.git
 cd filipino-cookbook-api-soriano
-# To see files, access LocalDisk C:, look at users and your OS name, search for the repo folder
+```
+> To see files, access LocalDisk C:, look at users and your OS name, search for the repo folder
 
 # 2. Install dependencies
 composer install
 
 # 3. Copy the example environment file and fill in your own values
+```bash
 cp .env.example .env
+```
 
 # 4. Import the SQL database (see Database Setup below)
 
 # 5. Run the API
 - **Method A: PHP Built-in Server (Recommended for Standalone users)**
 # Keep the terminal open and running
+```bash
 php -S localhost:8000 -t public
+```
 # Your API base URL will be: http://localhost:8000
 
 - **Method B: XAMPP / Apache Server**
@@ -64,7 +69,6 @@ php -S localhost:8000 -t public
 # Your API base URL will be: http://localhost/filipino-cookbook-api-soriano/public/
 
 # 6. Test the endpoints using Thunder Client 
-```
 
 ## Database Setup
 - **Database name:** `filipino_cookbook_api` or `filipino_cookbook_api_your-surname`
@@ -97,10 +101,12 @@ DB_PASS=YOUR_DATABASE_PASSWORD
 DB_NAME=filipino_cookbook_api
 API_BEARER_TOKEN=dmmmsu-cookbook-token-2026
 BASE_PATH=/filipino-cookbook-api-soriano/public
-> for XAMPP users
-BASE_PATH=
-> for php -S users
 ```
+> for XAMPP users
+```
+BASE_PATH=
+```
+> for php -S users
 > `.env` is excluded via `.gitignore`. Use `.env.example` as a template with placeholder values only.
 
 ## Base URL
