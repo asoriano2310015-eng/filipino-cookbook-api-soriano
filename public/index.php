@@ -24,18 +24,21 @@ $app->setBasePath($basePath);
 
 //Add Global CORS Middleware 
 $app->add(function (Request $request, $handler) {
+    if ($request->getMethod() === 'OPTIONS') {
+        $response = new \Slim\Psr7\Response();
+        return $response
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+            ->withStatus(200);
+    }
+
     $response = $handler->handle($request);
     return $response
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 });
-
-// Handle preflight CORS OPTIONS requests
-$app->options('/{routes:.+}', function (Request $request, Response $response) {
-    return $response;
-});
-
 
 /**
  * DATABASE CONNECTION (PDO)
